@@ -54,6 +54,9 @@ public class Key {
     public byte mapSbox(int row,int col){
         return (byte) this.SBox[row*16+col];
     }
+    public byte mapInSbox(int row,int col){
+        return (byte) this.SBox[row*16+col];
+    }
     public static SecretKey generateAESKey(int keySize) throws NoSuchAlgorithmException {
         if (keySize != 128 && keySize != 192 && keySize != 256) {
             throw new IllegalArgumentException("Invalid AES key size. Must be 128, 192, or 256 bits.");
