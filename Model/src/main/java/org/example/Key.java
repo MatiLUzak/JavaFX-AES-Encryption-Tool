@@ -55,7 +55,7 @@ public class Key {
         return (byte) this.SBox[row*16+col];
     }
     public byte mapInSbox(int row,int col){
-        return (byte) this.SBox[row*16+col];
+        return (byte) this.inverseSBox[row*16+col];
     }
     public static SecretKey generateAESKey(int keySize) throws NoSuchAlgorithmException {
         if (keySize != 128 && keySize != 192 && keySize != 256) {
