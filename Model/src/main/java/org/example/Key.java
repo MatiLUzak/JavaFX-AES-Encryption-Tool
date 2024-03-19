@@ -51,6 +51,9 @@ public class Key {
 
     private final int[] RCON = new int[]{
             0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36, 0x6C, 0xD8, 0xAB, 0x4D, 0x9A};
+    public byte mapSbox(int row,int col){
+        return (byte) this.SBox[row*16+col];
+    }
     public static SecretKey generateAESKey(int keySize) throws NoSuchAlgorithmException {
         if (keySize != 128 && keySize != 192 && keySize != 256) {
             throw new IllegalArgumentException("Invalid AES key size. Must be 128, 192, or 256 bits.");
