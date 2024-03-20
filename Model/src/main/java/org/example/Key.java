@@ -9,9 +9,6 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 public class Key {
-    private Vector<Byte> finalKey = new Vector<>();
-
-    private Map<Integer, Integer> numberOfBytes = Map.of(16, 176, 24, 208, 32, 240);
 
     private final int[] SBox = new int[]{
             0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -51,12 +48,16 @@ public class Key {
 
     private final int[] RCON = new int[]{
             0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36, 0x6C, 0xD8, 0xAB, 0x4D, 0x9A};
-    public byte mapSbox(int row,int col){
+    public byte mapSbox(byte row,byte col){
         return (byte) this.SBox[row*16+col];
     }
-    public byte mapInSbox(int row,int col){
+    public byte mapInSbox(byte row,byte col){
         return (byte) this.inverseSBox[row*16+col];
     }
+
+    private Vector<Byte> finalKey = new Vector<>();
+
+    private Map<Integer, Integer> numberOfBytes = Map.of(16, 176, 24, 208, 32, 240);
     public static SecretKey generateAESKey(int keySize) throws NoSuchAlgorithmException {
         if (keySize != 128 && keySize != 192 && keySize != 256) {
             throw new IllegalArgumentException("Invalid AES key size. Must be 128, 192, or 256 bits.");
@@ -71,13 +72,70 @@ public class Key {
     }
 
     public byte[] keyExpansion(SecretKey secretKey){
+        this.finalKey.clear();
         byte[] keybyte= secretKey.getEncoded();
         for(byte b:keybyte){
             this.finalKey.add(b);
         }
-        for(byte b:finalKey){
+        int iter=1;
+        while(this.finalKey.size()<this.numberOfBytes.get(keybyte.length)){
+            Vector<Byte> vector=LastWord();
+            rotateByteLeft(vector);
+            subSbox(vector);
+            Rcon(vector,iter);
+            Xor(vector,keybyte.length);
+            int steps=(keybyte.length==32)?7:(keybyte.length==24)?5:3;
+            for(int i=0;i<steps;i++){
+                vector=LastWord();
+                if (i == 4 && keybyte.length == 32) {  // specjalny przypadek dla AES-256
+                    subSbox(vector);
+                }
+                Xor(vector, keybyte.length);
+            }
+            iter++;
 
         }
-        return new byte[0];
+        byte[] finalKeyArray = new byte[this.finalKey.size()];
+        for (int i = 0; i < this.finalKey.size(); i++) {
+            finalKeyArray[i] = this.finalKey.get(i);
+        }
+        return finalKeyArray;
+    }
+    public void printFinalKey(byte[] finalKey) {
+        System.out.println("Final Key:");
+        for (byte b : finalKey) {
+            System.out.print(String.format("%02X ", b));
+        }
+        System.out.println();
+    }
+    private Vector<Byte>LastWord(){
+        Vector<Byte> lastWord=new Vector<>();
+        for(int i =0;i<4;i++){
+            lastWord.add(this.finalKey.get(this.finalKey.size()-4+i));
+        }
+
+        return lastWord;
+    }
+    private void rotateByteLeft(Vector<Byte> vector){
+        Byte first=vector.removeFirst();
+        vector.add(first);
+    }
+    private void subSbox(Vector<Byte> vector){
+        for(int i=0;i<vector.size();i++){
+            byte row=(byte) ((vector.get(i)>>>4)&0x0F);
+            byte col=(byte) (vector.get(i)&0x0F);
+            vector.set(i,mapSbox(row,col));
+        }
+    }
+    private void Rcon(Vector<Byte> vector,int i){
+        byte rconValue = (byte) (RCON[i-1]& 0xFF);
+        byte firstByte = vector.get(0);
+        vector.set(0, (byte) (firstByte ^ rconValue));
+    }
+    private void Xor(Vector<Byte> vector,int keyLen){
+        int start=this.finalKey.size()-keyLen;
+        for(int i=0;i<vector.size();i++){
+            this.finalKey.add((byte)(this.finalKey.get(start+i)^vector.get(i)));
+        }
     }
 }
