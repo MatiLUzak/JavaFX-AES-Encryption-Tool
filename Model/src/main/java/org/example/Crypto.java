@@ -130,4 +130,7 @@ public class Crypto {
         this.finalkey= key.keyExpansion(this.secretKey);
 
     }
+    private void getSubKey(int i){
+        byte[][] subKey=new byte[4][4];
+    }
 }
