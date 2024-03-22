@@ -125,12 +125,158 @@ public class Crypto {
     private byte[] finalkey;
 
     private Key key=new Key();
-    public Crypto(SecretKey secretKey){
+     public Crypto(SecretKey secretKey){
         this.secretKey=secretKey;
         this.finalkey= key.keyExpansion(this.secretKey);
 
     }
-    private void getSubKey(int i){
-        byte[][] subKey=new byte[4][4];
+   /* public Crypto(byte[] finalkey){
+        this.finalkey=finalkey;
+    }*/
+
+    public void encrypt(byte[][]dataBlock){
+        xorByKey(dataBlock,getSubKey(0));
+        for (int i = 1; i <= (this.finalkey.length - 32) / 16; i++){
+            subSbox(dataBlock);
+            shiftRows(dataBlock);
+            mixColumns(dataBlock);
+            xorByKey(dataBlock,getSubKey(i));
+        }
+        subSbox(dataBlock);
+        shiftRows(dataBlock);
+        xorByKey(dataBlock,getSubKey(this.finalkey.length / 16 - 1));
     }
+    private byte[][] getSubKey(int i){
+        byte[][] subKey=new byte[4][4];
+        for(int j=0;j<16;j++){
+            subKey[j%4][j/4]=this.finalkey[i*4*4+j];
+        }
+        return subKey;
+    }
+    private void xorByKey(byte[][]dataBlock,byte[][]key){
+        for (int i=0;i<4;i++){
+            for(int j=0;j<4;j++){
+                dataBlock[i][j]^=key[i][j];
+            }
+        }
+    }
+    private void subSbox(byte[][]dataBlock){
+        for(int i=0;i<4;i++){
+            for (int j=0;j<4;j++){
+                byte row=(byte) ((dataBlock[i][j]>>>4)&0x0F);
+                byte col=(byte) (dataBlock[i][j]&0x0F);
+                dataBlock[i][j]=this.key.mapSbox(row,col);
+            }
+        }
+    }
+    public void shiftRows(byte[][] datablock) {
+        byte temp;
+
+        temp = datablock[1][0];
+        datablock[1][0] = datablock[1][1];
+        datablock[1][1] = datablock[1][2];
+        datablock[1][2] = datablock[1][3];
+        datablock[1][3] = temp;
+
+        temp = datablock[2][0];
+        datablock[2][0] = datablock[2][2];
+        datablock[2][2] = temp;
+        temp = datablock[2][1];
+        datablock[2][1] = datablock[2][3];
+        datablock[2][3] = temp;
+
+        temp = datablock[3][0];
+        datablock[3][0] = datablock[3][3];
+        datablock[3][3] = datablock[3][2];
+        datablock[3][2] = datablock[3][1];
+        datablock[3][1] = temp;
+    }
+    private void mixColumns(byte[][] dataBlock) {
+        byte[][] copyBlock = new byte[4][4];
+        for (int i = 0; i < 4; i++) {
+            System.arraycopy(dataBlock[i], 0, copyBlock[i], 0, 4);
+        }
+        for (int col = 0; col < 4; col++) {
+            for (int row = 0; row < 4; row++) {
+                byte result = 0;
+                for (int k = 0; k < 4; k++) {
+                    result ^=  galoisMult(encryptionMatrix[row][k], copyBlock[k][col]);
+                }
+                dataBlock[row][col] = result;
+            }
+        }
+    }
+    private byte  galoisMult(byte coefficient, byte value) {
+        int index = value & 0xFF;
+        switch (coefficient) {
+            case 2: return (byte) mul2[index];
+            case 3: return (byte) mul3[index];
+            case 9: return (byte) mul9[index];
+            case 11: return (byte) mul11[index];
+            case 13: return (byte) mul13[index];
+            case 14: return (byte) mul14[index];
+            default: return value;
+        }
+    }
+    private void invSubSbox(byte[][]dataBlock){
+        for(int i=0;i<4;i++){
+            for (int j=0;j<4;j++){
+                byte row=(byte) ((dataBlock[i][j]>>>4)&0x0F);
+                byte col=(byte) (dataBlock[i][j]&0x0F);
+                dataBlock[i][j]=this.key.mapInSbox(row,col);
+            }
+        }
+    }
+    public void invShiftRows(byte[][] dataBlock) {
+        byte temp;
+
+        temp = dataBlock[1][3];
+        dataBlock[1][3] = dataBlock[1][2];
+        dataBlock[1][2] = dataBlock[1][1];
+        dataBlock[1][1] = dataBlock[1][0];
+        dataBlock[1][0] = temp;
+
+        temp = dataBlock[2][2];
+        dataBlock[2][2] = dataBlock[2][0];
+        dataBlock[2][0] = temp;
+        temp = dataBlock[2][3];
+        dataBlock[2][3] = dataBlock[2][1];
+        dataBlock[2][1] = temp;
+
+        temp = dataBlock[3][0];
+        dataBlock[3][0] = dataBlock[3][1];
+        dataBlock[3][1] = dataBlock[3][2];
+        dataBlock[3][2] = dataBlock[3][3];
+        dataBlock[3][3] = temp;
+    }
+    private void invmixColumns(byte[][] dataBlock) {
+        byte[][] copyBlock = new byte[4][4];
+        for (int i = 0; i < 4; i++) {
+            System.arraycopy(dataBlock[i], 0, copyBlock[i], 0, 4);
+        }
+        for (int col = 0; col < 4; col++) {
+            for (int row = 0; row < 4; row++) {
+                byte result = 0;
+                for (int k = 0; k < 4; k++) {
+                    result ^=  galoisMult(decryptionMatrix[row][k], copyBlock[k][col]);
+                }
+                dataBlock[row][col] = result;
+            }
+        }
+    }
+    public void decrypt(byte[][] dataBlock) {
+        xorByKey(dataBlock, getSubKey(finalkey.length / 16 - 1));
+        invShiftRows(dataBlock);
+        invSubSbox(dataBlock);
+        for (int i = (finalkey.length - 32) / 16; i >= 1; i--) {
+            xorByKey(dataBlock, getSubKey(i));
+            invmixColumns(dataBlock);
+            invShiftRows(dataBlock);
+            invSubSbox(dataBlock);
+        }
+        xorByKey(dataBlock, getSubKey(0));
+    }
+
+
+
 }
