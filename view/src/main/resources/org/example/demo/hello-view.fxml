@@ -3,28 +3,48 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" prefHeight="500" prefWidth="668.0" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.demo.HelloController">
-  <padding>
-    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-  </padding>
-    <fx:define>
-        <ToggleGroup fx:id="keySizeGroup"/>
-    </fx:define>
-    <HBox spacing="10">
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="800" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.demo.HelloController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+
+    <Label text="Key Size:"/>
+    <HBox spacing="10" alignment="CENTER">
         <!-- Radio Buttons for Key Size Selection -->
-        <RadioButton fx:id="keySize128" text="128" toggleGroup="$keySizeGroup"/>
-        <RadioButton fx:id="keySize192" text="192" toggleGroup="$keySizeGroup"/>
-        <RadioButton fx:id="keySize256" text="256" toggleGroup="$keySizeGroup"/>
+        <RadioButton fx:id="keySize128" text="128"/>
+        <RadioButton fx:id="keySize192" text="192"/>
+        <RadioButton fx:id="keySize256" text="256"/>
         <Button fx:id="generateKeyButton" text="Generate Key" onAction="#onGenerateKey"/>
     </HBox>
 
     <!-- Text Field for Displaying Generated Key -->
-    <TextField fx:id="keyDisplayField" editable="false" promptText="Generated key will appear here..." />
-  <TextArea fx:id="inputTextArea" promptText="Wpisz tekst tutaj..." />
-  <Button onAction="#encrypt" text="zaszyfruj" />
-    <Button onAction="#decrypt" text="odszyfruj" />
-    <Button onAction="#encrytpfile" text="zaszyfruj plik" />
-    <Button onAction="#decryptfile" text="odszyfruj plik" />
-  <TextArea fx:id="outputTextArea" editable="false" promptText="Tutaj pojawi się tekst binarny..." />
+    <TextField fx:id="keyDisplayField" editable="false" promptText="Generated key will appear here..."/>
+
+    <Separator/>
+
+    <VBox spacing="10">
+        <Label text="Enter Text:"/>
+        <TextArea fx:id="inputTextArea" promptText="Wpisz tekst tutaj..." minHeight="100.0"/>
+        <HBox spacing="15" alignment="CENTER">
+            <Button onAction="#encrypt" text="Zaszyfruj" minWidth="100"/>
+            <Button onAction="#decrypt" text="Odszyfruj" minWidth="100"/>
+        </HBox>
+    </VBox>
+
+    <Separator/>
+
+    <VBox spacing="10">
+        <Label text="File Encryption:"/>
+        <HBox spacing="15" alignment="CENTER">
+            <Button onAction="#encrytpfile" text="Zaszyfruj Plik" minWidth="100"/>
+            <Button onAction="#decryptfile" text="Odszyfruj Plik" minWidth="100"/>
+        </HBox>
+    </VBox>
+
+    <Separator/>
+
+    <Label text="Output:"/>
+    <TextArea fx:id="outputTextArea" editable="false" promptText="Tutaj pojawi się tekst zaszyfrowany..." minHeight="100.0"/>
 </VBox>
