@@ -1,5 +1,9 @@
 package org.example;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class TextConverter {
     private static final int BLOCK_SIZE = 16;
     public  String convertToBinary(String text) {
@@ -40,5 +44,17 @@ public class TextConverter {
             }
         }
         return bytes;
+    }
+    public List<byte[]> divineIntoBlocksFile(byte[]data){
+        int blockCount=(int) Math.ceil((double) data.length/BLOCK_SIZE);
+        List<byte[]>blocks=new ArrayList<>(blockCount);
+        for(int i=0;i<blockCount;i++){
+            int from=i*BLOCK_SIZE;
+            int to=Math.min(from+BLOCK_SIZE,data.length);
+            byte[] block= Arrays.copyOfRange(data,from,to);
+            blocks.add(block);
+        }
+
+        return blocks;
     }
 }
