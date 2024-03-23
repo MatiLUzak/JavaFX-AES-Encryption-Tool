@@ -22,6 +22,7 @@
     <!-- Text Field for Displaying Generated Key -->
     <TextField fx:id="keyDisplayField" editable="false" promptText="Generated key will appear here..." />
   <TextArea fx:id="inputTextArea" promptText="Wpisz tekst tutaj..." />
-  <Button onAction="#convertToBinary" text="Konwertuj na binarne" />
+  <Button onAction="#encrypt" text="zaszyfruj" />
+    <Button onAction="#decrypt" text="odszyfruj" />
   <TextArea fx:id="outputTextArea" editable="false" promptText="Tutaj pojawi się tekst binarny..." />
 </VBox>

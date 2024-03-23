@@ -1,7 +1,7 @@
 package org.example;
 
 public class TextConverter {
-
+    private static final int BLOCK_SIZE = 16;
     public  String convertToBinary(String text) {
         byte[] bytes = text.getBytes();
         StringBuilder stringBuilder = new StringBuilder();
@@ -14,5 +14,31 @@ public class TextConverter {
             stringBuilder.append(" ");
         }
         return stringBuilder.toString();
+    }
+    public String[] divideIntoBlocks(String text) {
+        byte[] textBytes = text.getBytes(); // Pobieranie bajtów tekstu
+        int blockCount = (int) Math.ceil((double) textBytes.length / BLOCK_SIZE);
+        String[] blocks = new String[blockCount];
+
+        for (int i = 0; i < blockCount; i++) {
+            int from = i * BLOCK_SIZE;
+            int to = Math.min(from + BLOCK_SIZE, textBytes.length);
+            byte[] block = java.util.Arrays.copyOfRange(textBytes, from, to);
+            blocks[i] = new String(block);
+        }
+
+        return blocks;
+    }
+
+
+    public byte[][] transformToByteMatrix(byte[] byteText) {
+        byte[][] bytes = new byte[4][4]; // Dla 128-bitowego bloku
+        int index = 0;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                bytes[i][j] = index < byteText.length ? byteText[index++] : 0;
+            }
+        }
+        return bytes;
     }
 }
