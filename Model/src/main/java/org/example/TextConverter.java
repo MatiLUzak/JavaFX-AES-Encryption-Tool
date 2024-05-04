@@ -5,7 +5,15 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TextConverter {
-    private static final int BLOCK_SIZE = 16;
+    private final int BLOCK_SIZE;
+
+    public TextConverter() {
+        this.BLOCK_SIZE=16;
+    }
+    public TextConverter(int blockSize){
+        this.BLOCK_SIZE=blockSize;
+    }
+
     public  String convertToBinary(String text) {
         byte[] bytes = text.getBytes();
         StringBuilder stringBuilder = new StringBuilder();

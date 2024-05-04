@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="800" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.demo.HelloController">
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="800" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.demo.RSAController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
 
-    <Label text="Key Size:"/>
+    <Label text="Choose RSA Key Size:"/>
     <HBox spacing="10" alignment="CENTER">
-        <!-- Radio Buttons for Key Size Selection -->
-        <RadioButton fx:id="keySize128" text="128"/>
-        <RadioButton fx:id="keySize192" text="192"/>
-        <RadioButton fx:id="keySize256" text="256"/>
+        <RadioButton fx:id="keySize1024" text="1024" />
+        <RadioButton fx:id="keySize2048" text="2048"/>
+        <RadioButton fx:id="keySize3072" text="3072"/>
         <Button fx:id="generateKeyButton" text="Generate Key" onAction="#onGenerateKey"/>
     </HBox>
 
-    <!-- Text Field for Displaying Generated Key -->
-    <TextField fx:id="keyDisplayField" editable="false" promptText="Generated key will appear here..."/>
+    <Label text="Public Key:"/>
+    <TextField fx:id="publicKeyField" editable="false"/>
+
+    <Label text="Private Key:"/>
+    <TextField fx:id="privateKeyField" editable="false"/>
 
     <Separator/>
 
@@ -38,8 +39,8 @@
     <VBox spacing="10">
         <Label text="File Encryption:"/>
         <HBox spacing="15" alignment="CENTER">
-            <Button onAction="#encrytpfile" text="Zaszyfruj Plik" minWidth="100"/>
-            <Button onAction="#decryptfile" text="Odszyfruj Plik" minWidth="100"/>
+            <Button onAction="#encryptFile" text="Zaszyfruj Plik" minWidth="100"/>
+            <Button onAction="#decryptFile" text="Odszyfruj Plik" minWidth="100"/>
         </HBox>
     </VBox>
 
@@ -47,5 +48,5 @@
 
     <Label text="Output:"/>
     <TextArea fx:id="outputTextArea" editable="false" promptText="Tutaj pojawi się tekst zaszyfrowany..." minHeight="100.0"/>
-    <Button text="Switch to RSA" onAction="#switchToRSA"/>
+    <Button text="Switch to AES" onAction="#switchToAES"/>
 </VBox>

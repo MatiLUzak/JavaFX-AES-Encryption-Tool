@@ -4,6 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.example.Crypto;
 import org.example.Key;
 import org.example.TextConverter;
@@ -21,6 +22,8 @@ import java.util.Base64;
 import java.util.List;
 
 public class HelloController {
+    @FXML
+    private Stage primaryStage;
     public RadioButton keySize128;
     public RadioButton keySize256;
     public RadioButton keySize192;
@@ -164,6 +167,15 @@ public class HelloController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @FXML
+    private void switchToRSA(ActionEvent actionEvent) {
+        try {
+            HelloApplication.loadRSA();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
