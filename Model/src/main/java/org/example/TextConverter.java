@@ -5,6 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TextConverter {
+    public int getBlockSize() {
+        return BLOCK_SIZE;
+    }
+
     private final int BLOCK_SIZE;
 
     public TextConverter() {
@@ -63,6 +67,14 @@ public class TextConverter {
             blocks.add(block);
         }
 
+        return blocks;
+    }
+    public List<byte[]> divideIntoRSABlocks(byte[] data) {
+        List<byte[]> blocks = new ArrayList<>();
+        for (int start = 0; start < data.length; start += BLOCK_SIZE) {
+            int end = Math.min(start + BLOCK_SIZE, data.length);
+            blocks.add(Arrays.copyOfRange(data, start, end));
+        }
         return blocks;
     }
 }

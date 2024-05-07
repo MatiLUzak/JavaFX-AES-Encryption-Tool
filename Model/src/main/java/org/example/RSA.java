@@ -2,6 +2,8 @@ package org.example;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RSA {
     private BigInteger n;  // n = p*q
@@ -16,7 +18,6 @@ public class RSA {
 
         BigInteger phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
         e = BigInteger.probablePrime(bits / 2, random);
-        // Ensure e is coprime to phi(n) and smaller than phi(n)
         while (phi.gcd(e).intValue() > 1) {
             e = BigInteger.probablePrime(bits / 2, random);
         }
@@ -31,20 +32,43 @@ public class RSA {
         return message.modPow(d, n);
     }
 
+    public String getPublicKeyString() {
+        return e.toString();
+    }
+
+    public String getPrivateKeyString() {
+        return d.toString();
+    }
+
+    public BigInteger getN() {
+        return n;  // zwróć wartość n
+    }
+
     public static void main(String[] args) {
-        RSA rsa = new RSA(1024);  // Use 1024-bit keys for example
+        RSA rsa = new RSA(1024);
+        TextConverter converter = new TextConverter(117);  // RSA block size
 
-        // Example message
-        String text = "Hello, RSA!";
-        byte[] bytes = text.getBytes();
-        BigInteger message = new BigInteger(bytes);
+        // Example long message
+        String longText = "The quick brown fox jumps over the lazy dog repeated to make a long string. ";
+        longText = longText.repeat(10);
 
-        BigInteger encrypted = rsa.encrypt(message);
-        BigInteger decrypted = rsa.decrypt(encrypted);
+        List<byte[]> blocks = converter.divideIntoRSABlocks(longText.getBytes());
 
-        String decryptedText = new String(decrypted.toByteArray());
-        System.out.println("Original: " + text);
-        System.out.println("Encrypted: " + encrypted.toString());
-        System.out.println("Decrypted: " + decryptedText);
+        List<BigInteger> encryptedBlocks = new ArrayList<>();
+        List<String> decryptedBlocks = new ArrayList<>();
+
+        for (byte[] block : blocks) {
+            BigInteger message = new BigInteger(1, block);
+            BigInteger encrypted = rsa.encrypt(message);
+            encryptedBlocks.add(encrypted);
+
+            BigInteger decrypted = rsa.decrypt(encrypted);
+            decryptedBlocks.add(new String(decrypted.toByteArray()));
+        }
+
+        // Output the results
+        System.out.println("Original message: " + longText);
+        System.out.println("Decrypted message: ");
+        decryptedBlocks.forEach(System.out::print);
     }
 }
