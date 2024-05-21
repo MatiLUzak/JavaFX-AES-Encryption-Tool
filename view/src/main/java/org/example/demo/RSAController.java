@@ -121,9 +121,10 @@ public class RSAController {
                     BigInteger encrypted = rsa.encrypt(message);
                     encryptedBlocks.add(encrypted);
                     byte[] encryptedBytes = encrypted.toByteArray();
-                    String encodedBlock = Base64.getEncoder().encodeToString(encryptedBytes);
-                    outputStream.write((encodedBlock + "|").getBytes(StandardCharsets.UTF_8)); // Separator bloków
+                    outputStream.write(Base64.getEncoder().encode(encryptedBytes));
+                    outputStream.write('|');
                 }
+
                 byte[] encryptedFileBytes = outputStream.toByteArray();
                 FileChooser saveFileChooser = new FileChooser();
                 saveFileChooser.setTitle("Save Encrypted File");
@@ -155,11 +156,10 @@ public class RSAController {
                     }
                 }
 
-                // Decrypt each block
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 for (BigInteger encrypted : encryptedBlocks) {
                     BigInteger decrypted = rsa.decrypt(encrypted);
-                    byte[] decryptedBytes = decrypted.toByteArray();
+                    byte[] decryptedBytes = removeLeadingZeros(decrypted.toByteArray());
                     outputStream.write(decryptedBytes);
                 }
 
@@ -176,6 +176,14 @@ public class RSAController {
                 outputTextArea.setText("File decryption failed: " + e.getMessage());
             }
         }
+    }
+
+    private byte[] removeLeadingZeros(byte[] data) {
+        int index = 0;
+        while (index < data.length && data[index] == 0) {
+            index++;
+        }
+        return Arrays.copyOfRange(data, index, data.length);
     }
 
 
