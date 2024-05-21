@@ -111,69 +111,75 @@ public class RSAController {
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
             try {
-                byte[] fileData = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
-                List<byte[]> blocks = textConverter.divideIntoRSABlocks(fileData);
-                encryptedBlocks.clear(); // Wyczyszczenie listy zaszyfrowanych bloków przed nowym szyfrowaniem
+                byte[] fileBytes = Files.readAllBytes(file.toPath());
+                List<byte[]> blocks = textConverter.divideIntoRSABlocks(fileBytes);
+                encryptedBlocks.clear();
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
                 for (byte[] block : blocks) {
                     BigInteger message = new BigInteger(1, block);
                     BigInteger encrypted = rsa.encrypt(message);
-                    encryptedBlocks.add(encrypted); // Zapisanie zaszyfrowanego bloku do listy
-
+                    encryptedBlocks.add(encrypted);
                     byte[] encryptedBytes = encrypted.toByteArray();
-                    int encryptedBlockSize = rsa.getN().bitLength() / 8;
-                    if (encryptedBytes.length < encryptedBlockSize) {
-                        byte[] paddedEncryptedBytes = new byte[encryptedBlockSize];
-                        System.arraycopy(encryptedBytes, 0, paddedEncryptedBytes, encryptedBlockSize - encryptedBytes.length, encryptedBytes.length);
-                        encryptedBytes = paddedEncryptedBytes;
-                    }
-
-                    outputStream.write(encryptedBytes);
+                    String encodedBlock = Base64.getEncoder().encodeToString(encryptedBytes);
+                    outputStream.write((encodedBlock + "|").getBytes(StandardCharsets.UTF_8)); // Separator bloków
                 }
-
-                byte[] encryptedData = outputStream.toByteArray();
+                byte[] encryptedFileBytes = outputStream.toByteArray();
                 FileChooser saveFileChooser = new FileChooser();
-                File saveFile = saveFileChooser.showSaveDialog(null);
-                if (saveFile != null) {
-                    Files.write(Paths.get(saveFile.getAbsolutePath()), encryptedData);
+                saveFileChooser.setTitle("Save Encrypted File");
+                File savedFile = saveFileChooser.showSaveDialog(null);
+                if (savedFile != null) {
+                    Files.write(savedFile.toPath(), encryptedFileBytes, StandardOpenOption.CREATE);
+                    outputTextArea.setText("File encrypted and saved successfully.");
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                outputTextArea.setText("File encryption failed: " + e.getMessage());
             }
         }
     }
 
     public void decryptFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Wybierz zaszyfrowany plik do odszyfrowania");
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
             try {
-                byte[] encodedData = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
-                int blockSize = rsa.getN().bitLength() / 8;
+                byte[] encryptedFileBytes = Files.readAllBytes(file.toPath());
+                String encryptedFileContent = new String(encryptedFileBytes, StandardCharsets.UTF_8);
+                String[] encryptedBlockStrings = encryptedFileContent.split("\\|");
+                encryptedBlocks.clear();
+
+                for (String blockString : encryptedBlockStrings) {
+                    if (!blockString.isEmpty()) {
+                        byte[] block = Base64.getDecoder().decode(blockString);
+                        encryptedBlocks.add(new BigInteger(1, block));
+                    }
+                }
+
+                // Decrypt each block
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-                for (int start = 0; start < encodedData.length; start += blockSize) {
-                    int end = Math.min(start + blockSize, encodedData.length);
-                    byte[] block = Arrays.copyOfRange(encodedData, start, end);
-
-                    BigInteger encrypted = new BigInteger(1, block);
+                for (BigInteger encrypted : encryptedBlocks) {
                     BigInteger decrypted = rsa.decrypt(encrypted);
                     byte[] decryptedBytes = decrypted.toByteArray();
                     outputStream.write(decryptedBytes);
                 }
 
-                byte[] decryptedData = outputStream.toByteArray();
+                byte[] decryptedFileBytes = outputStream.toByteArray();
+
                 FileChooser saveFileChooser = new FileChooser();
-                File saveFile = saveFileChooser.showSaveDialog(null);
-                if (saveFile != null) {
-                    Files.write(Paths.get(saveFile.getAbsolutePath()), decryptedData);
+                saveFileChooser.setTitle("Save Decrypted File");
+                File savedFile = saveFileChooser.showSaveDialog(null);
+                if (savedFile != null) {
+                    Files.write(savedFile.toPath(), decryptedFileBytes, StandardOpenOption.CREATE);
+                    outputTextArea.setText("File decrypted and saved successfully.");
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                outputTextArea.setText("File decryption failed: " + e.getMessage());
             }
         }
     }
+
+
+
+
 
 }
