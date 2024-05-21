@@ -49,13 +49,13 @@ public class RSAController {
         } else if (keySize2048.isSelected()) {
             keySize = 2048;
         } else if (keySize3072.isSelected()) {
-            keySize = 3072;
+            keySize = 3200;
         } else {
             publicKeyField.setText("Select a key size");
             return;
         }
         this.rsa = new RSA(keySize);
-        int blockSize = (keySize / 8) - 11;
+        int blockSize = 389;
         this.textConverter = new TextConverter(blockSize);
         publicKeyField.setText(rsa.getPublicKeyString());
         privateKeyField.setText(rsa.getPrivateKeyString());

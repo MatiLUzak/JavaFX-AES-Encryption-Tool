@@ -18,7 +18,7 @@ public class HelloApplication extends Application {
 
     public static void loadAES() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1800, 1200);
+        Scene scene = new Scene(fxmlLoader.load(), 180, 120);
         primaryStage.setTitle("AES Encryption");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -26,7 +26,7 @@ public class HelloApplication extends Application {
 
     public static void loadRSA() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("RSA.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1800, 1200);
+        Scene scene = new Scene(fxmlLoader.load(), 180, 120);
         primaryStage.setTitle("RSA Encryption");
         primaryStage.setScene(scene);
         primaryStage.show();
